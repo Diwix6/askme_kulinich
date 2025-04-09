@@ -155,6 +155,7 @@ def settings(request):
 
     return render(request, 'settings.html', {
         'login': CURRENT_USER,
+        'tags': TAGS,
         'email': user['email'],
         'nickname': user['nickname'],
     })
@@ -191,6 +192,7 @@ def register(request):
             error = 'Passwords do not match!'
         else:
             USERS[login] = {
+                'tags': TAGS,
                 'email': email,
                 'nickname': nickname,
                 'password': password,
