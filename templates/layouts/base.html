@@ -1,0 +1,72 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="{% static "css/bootstrap.css" %}" rel="stylesheet" />
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">Home</a>
+
+            <form class="d-flex" role="search" method="get" action="{% url 'ask_question' %}">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search_query">
+                <button class="btn btn-outline-success" type="submit">Ask</button>
+            </form>
+
+            <div class="d-flex gap-2 align-items-center">
+                <div>
+                    <img src="static/img/avatar.png" alt="img" class="img-thumbnale" width="50" height="50">
+                </div>
+                <div class="content">
+                    <div class="content__name">Dr. Pepper</div>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                      <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="btn btn-outline-primary me-1" href="{% url 'settings' %}">Settings</a>
+                          </li>
+                        <li class="nav-item">
+                          <a class="btn btn-outline-primary me-2" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="btn btn-primary" href="{% url 'register' %}">Register</a>
+                        </li>
+                      </ul>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </nav>
+
+    <main class="container mt-2">
+        <div class="row">
+            <section class="col vh-100">
+                <articles class="d-flex gap-3 flex-column">
+                    {% block content %}
+                    {% endblock %}
+                </articles>
+            </section>
+
+            <aside class="col-3">
+                <section class="mb-3">
+                    {% include 'layouts/popular-tags.html'%}
+                </section>
+
+                <section>
+                  {% include 'layouts/best-members.html'%}
+                </section>
+
+            </aside>
+        </div>
+    </main>
+    <script src="{% static "js/bootstrap.bundle.js" }%"></script>
+</body>
+
+</html>

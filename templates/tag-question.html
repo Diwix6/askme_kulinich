@@ -1,0 +1,49 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<h2>Tag: {{ tag }}</h2>
+
+{% if questions %}
+    {% for question in questions %}
+    <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-2 text-center">
+              <div class="border mb-2" style="height: 100px;">
+                {% if question.image_url %}
+                  <img src="{{ question.image_url }}" alt="img" class="img-fluid">
+                {% else %}
+                  <img src="https://www.svgrepo.com/show/452030/avatar-default.svg" alt="img" class="img-fluid">
+                {% endif %}
+              </div>
+              <input type="number" class="form-control" value="{{ question.votes }}">
+            </div>
+            <div class="col">
+              <h5 class="card-title"><a href="{% url 'question_detail' question.id %}">
+                  <h3>{{ question.title }}</h3>
+              </a></h5>
+              <p class="card-text">{{ question.description }}</p>
+              <div class="d-flex justify-content-between">
+                
+                <div>
+                  <p>{{ question.text|truncatechars:100 }}</p>
+                  <p>
+                      <a href="{% url 'question_detail' question.id %}">answer ({{ question.answer_count }})</a>
+                      Tags:
+                      {% for tag in question.tags %}
+                          <a class="badge rounded-pill text-bg-primary" href="{% url 'tag_view' tag %}">{{ tag }}</a>
+                          {% if not forloop.last %}, {% endif %}
+                      {% endfor %}
+                  </p>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+{% else %}
+    <p>No questions found for this tag.</p>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Log In</h2>
+    {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Login</label>
+        <input type="text" class="form-control" name="login" placeholder="Enter your login here">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password">
+      </div>
+      <button type="submit" class="btn btn-primary">Log in</button>
+    </form>
+    <a href="{% url 'register' %}" class="d-block mt-2">Create new account</a>
+  </div>
+{% endblock %}

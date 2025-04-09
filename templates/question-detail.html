@@ -1,0 +1,28 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="question-detail">
+    <h2>{{ question.title }}</h2>
+    <p>{{ question.text }}</p>
+    <p>Tags:
+        {% for tag in question.tags %}
+            <a href="/tag/{{ tag }}/">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+
+    {% for answer in question.answers %}
+    <div class="answer-block">
+        <div class="vote">{{ answer.votes }}</div>
+        <div class="answer-text">{{ answer.text }}</div>
+        <div class="is-correct">
+            <input type="checkbox" {% if answer.is_correct %}checked{% endif %} disabled /> Correct!
+        </div>
+    </div>
+    {% endfor %}
+
+    <form action="" method="post">
+        {% csrf_token %}
+        <textarea name="new_answer" placeholder="Enter your answer here.."></textarea>
+        <button type="submit">Answer</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+<div class="row">
+
+    <!-- Questions List -->
+    <section class="col">
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <h1 class="h3 m-0">New Questions</h1>
+        <a href="#">Hot Questions</a>
+      </div>
+  
+      <div class="d-flex flex-column gap-3">
+        {% for question in questions %}
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-2 text-center">
+                <div class="border mb-2" style="height: 100px;">
+                  {% if question.image_url %}
+                    <img src="{{ question.image_url }}" alt="img" class="img-fluid">
+                  {% else %}
+                    <img src="https://via.placeholder.com/100" alt="img" class="img-fluid">
+                  {% endif %}
+                </div>
+                <input type="number" class="form-control" value="{{ question.votes }}">
+              </div>
+              <div class="col">
+                <h5 class="card-title">{{ question.title }}</h5>
+                <p class="card-text">{{ question.description }}</p>
+                <div class="d-flex justify-content-between">
+                  <a href="#">Answers ({{ question.answers_count }})</a>
+                  <div>
+                    <span>Tags:</span>
+                    {% for tag in question.tags %}
+                      <span class="badge rounded-pill text-bg-primary">{{ tag }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  
+    <!-- Sidebar -->
+    <aside class="col-3">
+      {% include "popular-tags.html" %}
+      {% include "best-members.html" %}
+    </aside>
+  
+  </div>
+  

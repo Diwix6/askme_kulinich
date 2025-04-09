@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Registration</h2>
+    {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Login</label>
+        <input type="text" class="form-control" name="login" value="{{ login }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" name="email" value="{{ email }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">NickName</label>
+        <input type="text" class="form-control" name="nickname" value="{{ nickname }}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Repeat password</label>
+        <input type="password" class="form-control" name="password2">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Upload avatar</label>
+        <input type="file" class="form-control" name="avatar">
+      </div>
+      <button type="submit" class="btn btn-success">Register</button>
+    </form>
+  </div>
+{% endblock %}

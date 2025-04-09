@@ -1,0 +1,9 @@
+<section class="mb-4">
+    <h4>Popular tags</h4>
+    <div class="d-flex flex-wrap gap-2">
+      {% for tag in tags %}
+        <a class="badge rounded-pill text-bg-primary" href="{% url 'tag_view' tag %}">{{ tag }}</a>
+      {% endfor %}
+    </div>
+  </section>
+  
