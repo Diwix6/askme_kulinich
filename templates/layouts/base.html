@@ -21,14 +21,14 @@
 
             <div class="d-flex gap-2 align-items-center">
                 <div>
-                    <img src="static/img/avatar.png" alt="img" class="img-thumbnale" width="50" height="50">
+                    <img  href="{% url 'settings' %}" src="static/img/avatar-default.svg" alt="svg" width="50" height="50" >
                 </div>
                 <div class="content">
                     <div class="content__name">Dr. Pepper</div>
                     <div class="collapse navbar-collapse" id="navbarNav">
                       <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="btn btn-outline-primary me-1" href="{% url 'settings' %}">Settings</a>
+                            <a class="btn btn-outline-info me-2" href="{% url 'settings' %}">Settings</a>
                           </li>
                         <li class="nav-item">
                           <a class="btn btn-outline-primary me-2" href="{% url 'login' %}">Login</a>

@@ -60,7 +60,7 @@ QUESTIONS  = [
         "id": 5,
         "title": "What is a decorator in Python?",
         "description": "I'm having trouble understanding Python decorators. Can someone explain them in simple terms?",
-        "image_url": "",
+        "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGutvh1GgYTBXgAshGV2OD0XPMUEzVFKUEWg&s",
         "votes": 15,
         "answers_count": 3,
         "tags": ["python", "decorators"],
@@ -105,7 +105,7 @@ def index(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
-        "questions": QUESTIONS,
+        "questions": page_obj,
         "tags": TAGS,
         "best_members": MEMBERS,
         "page": page_obj
@@ -113,7 +113,7 @@ def index(request):
     return render(request, 'index.html', context)
 
 def ask_question(request):
-    search_query = request.GET.get('search_query')  # Получаем текст из поля поиска
+    search_query = request.GET.get('search_query')
     if search_query:
         # Обрабатываем запрос
         print(f"User searched for: {search_query}")
