@@ -8,106 +8,49 @@
     <!-- Questions List -->
     <section class="col">
       <div class="d-flex align-items-center gap-2 mb-4">
-                    <h1>New Questions</h1>
-                    <a href="#">Hot Questions</a>
-                </div>
-  
+        <h3 id="question-title" class="question-tab active">New Questions</h3 >
+        <h4 href="#" id="hot-questions-link" class="question-tab">Hot Questions</h4>
+    </div>
+    
+    <style>
+      .question-tab {
+        text-decoration: none;
+        color: #666;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+      .question-tab.active {
+        color: green;
+        font-weight: bold;
+      }
+    </style>
+
       <div class="d-flex flex-column gap-3">
-        {% for question in questions %}
-        <div class="card">
-          <div class="card-body">
-            <div class="row">
-              <div class="col-2 text-center">
-                <div class="border mb-2" style="height: 120px; width: 120px;">
-                  {% if question.image_url %}
-                    <img src="{{ question.image_url }}" alt="img" class="img-fluid" width="110px" height="110px">
-                  {% else %}
-                    <img src="static/img/avatar-default.svg" alt="img" class="img-fluid" width="110" height="110">
-                  {% endif %}
-                </div>
-                <input type="number" class="form-control" value="{{ question.votes }}">
-              </div>
-              <div class="col">
-                <h5 class="card-title"><a href="{% url 'question_detail' question.id %}">
-                    <h3>{{ question.title }}</h3>
-                </a></h5>
-                <p class="card-text">{{ question.description }}</p>
-                <div class="d-flex justify-content-between">
-                  
-                  <div>
-                    <p>{{ question.text|truncatechars:100 }}</p>
-                    <p>
-                        <a href="{% url 'question_detail' question.id %}">Answer ({{ question.answer_count }})</a>
-                        Tags:
-                        {% for tag in question.tags %}
-                            <a class="badge rounded-pill text-bg-primary" href="{% url 'tag_view' tag %}">{{ tag }}</a>
-                        {% endfor %}
-                    </p>
-                    
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div id="question-list">
+          {% include 'layouts/question_list.html' %}
         </div>
-        {% endfor %}
       </div>
     </section>
-  
     <!-- Sidebar -->
     <!-- <aside class="col-3">
       {% include "layouts/popular-tags.html" %}
       {% include "layouts/best-members.html" %}
     </aside> -->
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-          {% if questions.has_previous %}
-            <li class="page-item">
-              <a class="page-link" href="?page=1">First</a>
-            </li>
-            <li class="page-item">
-              <a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a>
-            </li>
-          {% else %}
-            <li class="page-item disabled">
-              <span class="page-link">First</span>
-            </li>
-            <li class="page-item disabled">
-              <span class="page-link">Previous</span>
-            </li>
-          {% endif %}
-      
-          {% for num in page.paginator.page_range %}
-            {% if num >= page.number|add:"-2" and num <= page.number|add:"2" %}
-              {% if page.number == num %}
-                <li class="page-item active">
-                  <span class="page-link">{{ num }}</span>
-                </li>
-              {% else %}
-                <li class="page-item">
-                  <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                </li>
-              {% endif %}
-            {% endif %}
-          {% endfor %}
-      
-          {% if page.has_next %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ page.next_page_number }}">Next</a>
-            </li>
-            <li class="page-item">
-              <a class="page-link" href="?page={{ page.paginator.num_pages }}">Last</a>
-            </li>
-          {% else %}
-            <li class="page-item disabled">
-              <span class="page-link">Next</span>
-            </li>
-            <li class="page-item disabled">
-              <span class="page-link">Last</span>
-            </li>
-          {% endif %}
-        </ul>
-    </nav>
-</div>
+    
+{% include "layouts/pagination.html" %}
   
 {% endblock %}
+
+<script>
+  document.getElementById('hot-questions-link').addEventListener('click', function (e) {
+      e.preventDefault();
+  
+      fetch('/hot-questions/')
+          .then(response => response.text())
+          .then(data => {
+              document.getElementById('question-list').innerHTML = data;
+              document.getElementById('question-title').textContent = 'Hot Questions';
+          });
+  });
+  </script>
+  

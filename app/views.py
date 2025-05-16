@@ -1,121 +1,40 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.http import HttpResponse
+from django.contrib.auth.models import User
+from django.utils import timezone
+from .models import Question, Tag, Answer
+from django.shortcuts import redirect
 
-
-QUESTIONS  = [
-    {
-        'id': 1,
-        'title': 'How to build a moon park ?',
-        'text': 'Guys, I have trouble with a moon park. Can\'t find the black-jack...',
-        'tags': ['black-jack', 'bender'],
-        'votes': 5,
-        'answer_count': 3,
-        'image_url': 'https://i.namu.wiki/i/dnZQPPFWEI0SD-tpxtirXzuHWUcFeklRAlSWlVbQtDaEUcbrvZQ3RHXs5jdNcPC4xGXIKchwwaPO1qrELmhK5ujn0A0zT7m3el8C0NvdGWL0e0Q9Kbn6KjPrDSH5d7RUPU8u8m866z3pnin4N21hjg.webp',
-        'answers': [
-            {'text': 'Russia is huge and needs to be made habitable.', 'votes': 5, 'is_correct': True},
-            {'text': 'Same thought here.', 'votes': 3, 'is_correct': False},
-        ]
-    },
-    {
-        "id": 2,
-        "title": "How to use Django templates?",
-        "description": "I'm trying to render data using Django templates. Any tips?",
-        "image_url": "https://i.namu.wiki/i/apGZ4E5LnxUul1137rSThfzQqQUDBEBjHQnPnCJs89sbE1GQkQ6tGg73RfHPhgtU7J8Xgxow1tj4dZ5FsYRzTAHWvszjjPdcVJwzu8lASckk8Pnq0vMVI4i8Qo7EbOgv12-Z5R7-vdhRViRKn7VQhg.webp",
-        "votes": 5,
-        "answers_count": 3,
-        "tags": ["django", "templates", "python"], 
-        'answers': [
-            {'text': 'Russia is huge and needs to be made habitable.', 'votes': 5, 'is_correct': True},
-            {'text': 'Same thought here.', 'votes': 3, 'is_correct': False},
-        ]
-    },
-    {
-        "id": 3,
-        "title": "How does Python list comprehension work?",
-        "description": "I'm confused about how list comprehensions work in Python.",
-        "image_url": "https://i.namu.wiki/i/5MDQI0Cof2M500ftaX-ZC92csXtOvDKOYj50Z2E5P3Su0LdDL_DVDmkpgc2Rc4zNRs3ZjDT0xqQ3OLgplzAXFc53fc7rNk_8PKnu6XaDg4DQy9M96-m7_DHBvxbW0ojkGizMM6ZNErm4G58vsnSrUg.webp",
-        "votes": 8,
-        "answers_count": 5,
-        "tags": ["python", "lists"], 
-        'answers': [
-            {'text': 'Russia is huge and needs to be made habitable.', 'votes': 5, 'is_correct': True},
-            {'text': 'Same thought here.', 'votes': 3, 'is_correct': False},
-        ],
-    },
-    {
-        "id": 4,
-        "title": "What is the difference between a list and a tuple in Python?",
-        "description": "Can anyone explain the key differences between a Python list and a tuple?",
-        "image_url": "",
-        "votes": 12,
-        "answers_count": 4,
-        "tags": ["python", "lists", "tuples"],
-        "answers": [
-            {"text": "Lists are mutable, while tuples are immutable.", "votes": 6, "is_correct": True},
-            {"text": "Both are the same, just different names.", "votes": 2, "is_correct": False},
-        ],
-    },
-    {
-        "id": 5,
-        "title": "What is a decorator in Python?",
-        "description": "I'm having trouble understanding Python decorators. Can someone explain them in simple terms?",
-        "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGutvh1GgYTBXgAshGV2OD0XPMUEzVFKUEWg&s",
-        "votes": 15,
-        "answers_count": 3,
-        "tags": ["python", "decorators"],
-        "answers": [
-            {"text": "A decorator is a function that modifies the behavior of another function.", "votes": 9, "is_correct": True},
-            {"text": "Decorators are just for styling your code.", "votes": 1, "is_correct": False},
-        ],
-    },
-    {
-        "id": 6,
-        "title": "How to use list comprehension with if conditions?",
-        "description": "Can you give examples of how to use list comprehension with an if condition in Python?",
-        "image_url": "",
-        "votes": 10,
-        "answers_count": 4,
-        "tags": ["python", "list comprehension"],
-        "answers": [
-            {"text": "[x for x in range(10) if x % 2 == 0]", "votes": 5, "is_correct": True},
-            {"text": "[x for x in range(10) if x > 5]", "votes": 3, "is_correct": False},
-        ],
-    },
-]
-
-TAGS = ["django", "python", "html", "css", "bootstrap", "flask"]
-MEMBERS = ["Alice", "Bob", "Charlie", "Dana"]
-
-USERS = {
-    'dr_pepper': {
-        'email': 'dr.pepper@mail.ru',
-        'nickname': 'Dr. Pepper',
-        'password': '12345678',
-        'avatar': None
-    }
-}
-
-# Текущий пользователь (вместо сессии)
-CURRENT_USER = 'dr_pepper'
 
 
 def index(request):
+    QUESTIONS = Question.get_all_objects()
+    for i in QUESTIONS:
+        print(i.tags)
     paginator = Paginator(QUESTIONS, 5) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    TAGS = Tag.get_all_objects()
+    MEMBERS = User.objects.all()
     context = {
         "questions": page_obj,
         "tags": TAGS,
         "best_members": MEMBERS,
         "page": page_obj
+        # "answers_count": counter
     }
     return render(request, 'index.html', context)
 
+def hot_questions(request):
+    hot_questions = Question.objects.order_by('-rating')[:10]
+    return render(request, 'layouts/question_list.html', {'questions': hot_questions})
+
 def ask_question(request):
+    MEMBERS = User.objects.all()
+    TAGS = Tag.get_all_objects()
     search_query = request.GET.get('search_query')
     if search_query:
-        # Обрабатываем запрос
         print(f"User searched for: {search_query}")
     return render(request, 'ask-question.html', {
         'tags': TAGS,
@@ -125,7 +44,23 @@ def ask_question(request):
 
 
 def question_detail(request, question_id):
-    question = next((q for q in QUESTIONS if q['id'] == question_id), None)
+    QUESTIONS = Question.get_all_objects()
+    TAGS = Tag.get_all_objects()
+    MEMBERS = User.objects.all()
+    question = Question.get_by_id(question_id)
+
+    if request.method == 'POST':
+        answer_text = request.POST.get('new_answer')
+        if answer_text:
+            Answer.objects.create(
+                question=question,
+                author=request.user,
+                text=answer_text,
+                created_at=timezone.now()
+            )
+            return redirect('question_detail', question_id=question.id)
+
+    # question = next((q for q in QUESTIONS if q == question_id), None)
     if not question:
         return render(request, '404.html', status=404)
 
@@ -137,7 +72,10 @@ def question_detail(request, question_id):
 
 
 def tag_view(request, tag):
-    filtered_questions = [q for q in QUESTIONS if tag in q['tags']]
+    QUESTIONS = Question.get_all_objects()
+    TAGS = Tag.get_all_objects()
+    MEMBERS = User.objects.all()
+    filtered_questions = [q for q in QUESTIONS if tag in [t.name for t in q.tags.all()]]
     return render(request, 'tag-question.html', {
         'tag': tag,
         'questions': filtered_questions,
@@ -146,12 +84,14 @@ def tag_view(request, tag):
     })
 
 def settings(request):
+    TAGS = Tag.get_all_objects()
+    USERS = User.objects.all()
     user = USERS.get(CURRENT_USER)
     if request.method == 'POST':
         user['email'] = request.POST.get('email')
         user['nickname'] = request.POST.get('nickname')
         user['avatar'] = request.FILES.get('avatar')
-        return redirect('settings')  # обновить страницу
+        return redirect('settings')
 
     return render(request, 'settings.html', {
         'login': CURRENT_USER,
@@ -161,6 +101,7 @@ def settings(request):
     })
 
 def login(request):
+    USERS = User.objects.all()
     error = None
     if request.method == 'POST':
         login = request.POST.get('login')
@@ -175,6 +116,8 @@ def login(request):
     return render(request, 'login.html', {'error': error})
 
 def register(request):
+    TAGS = Tag.get_all_objects()
+    USERS = User.objects.all()
     error = None
     if request.method == 'POST':
         login = request.POST.get('login')

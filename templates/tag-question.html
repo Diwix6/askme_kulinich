@@ -29,7 +29,7 @@
                   <p>
                       <a href="{% url 'question_detail' question.id %}">answer ({{ question.answer_count }})</a>
                       Tags:
-                      {% for tag in question.tags %}
+                      {% for tag in question.tags.all %}
                           <a class="badge rounded-pill text-bg-primary" href="{% url 'tag_view' tag %}">{{ tag }}</a>
                           {% if not forloop.last %}, {% endif %}
                       {% endfor %}

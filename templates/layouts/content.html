@@ -20,13 +20,15 @@
                     <img src="https://via.placeholder.com/100" alt="img" class="img-fluid">
                   {% endif %}
                 </div>
-                <input type="number" class="form-control" value="{{ question.votes }}">
+              
+
               </div>
               <div class="col">
                 <h5 class="card-title">{{ question.title }}</h5>
                 <p class="card-text">{{ question.description }}</p>
                 <div class="d-flex justify-content-between">
-                  <a href="#">Answers ({{ question.answers_count }})</a>
+                  <a href="#">Answers({{ question.answers_count }})</a>
+                  
                   <div>
                     <span>Tags:</span>
                     {% for tag in question.tags %}
