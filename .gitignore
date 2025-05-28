@@ -4,3 +4,8 @@ askme_kulinich/__pycache__/
 venv/
 db.sqlite3
 staticfiles/
+# Ignore Python bytecode files
+*.pyc
+*.log
+# Ignore environment variable files
+.env
