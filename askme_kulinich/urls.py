@@ -26,7 +26,9 @@ urlpatterns = [
     # path('question/<int:question_id>/', views.question_detail, name='question_detail'),
     path('tag/<str:tag>/', views.tag_view, name='tag_view'),
     path('settings/', views.settings, name="settings"),
+    path('profile/edit/', views.edit_profile, name="edit_profile"),
     path('login/', views.login, name="login"),
-    path('register/', views.register, name="register"),
+    path('signup/', views.signup, name="signup"),
     path('hot-questions/', views.hot_questions, name='hot_questions'),
+    path('logout/', views.logout_views, name='logout'),
 ]

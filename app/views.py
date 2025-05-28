@@ -1,11 +1,14 @@
-from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.utils import timezone
-from .models import Question, Tag, Answer
-from django.shortcuts import redirect
-
+from django.contrib.auth import authenticate, login as auth_login, logout
+from .models import Question, Tag, Answer, Profile
+from django.shortcuts import redirect, render
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .forms import ProfileForm, AskForm, AnswerForm
+from django.shortcuts import get_object_or_404
 
 
 def index(request):
@@ -31,6 +34,37 @@ def hot_questions(request):
     return render(request, 'layouts/question_list.html', {'questions': hot_questions})
 
 def ask_question(request):
+    if request.method == 'POST':
+        print('request is POST')
+        form = AskForm(request.POST)
+        if form.is_valid():
+            print('form is valid')
+            # question = form.save(commit=False)
+            # question.author = request.user
+            # # question.title = form.cleaned_data['title']
+            # # question.text = form.cleaned_data['content']
+            # question.save()
+            # form.save_m2m()
+            q = Question.objects.create(
+                title=form.cleaned_data['title'],
+                text=form.cleaned_data['content'],
+                author=request.user,
+            )
+            raw_tags = form.cleaned_data['tags']
+            name_tags = raw_tags[0].split('/')
+            print(raw_tags, name_tags)
+            for name in name_tags:
+                tag, created = Tag.objects.get_or_create(name=name.lower())
+                q.tags.add(tag)
+            return redirect('question_detail', question_id=q.id)
+        else:
+            print('form is not valid')
+            for field, errors in form.errors.items():
+                print(f"Error in {field}: {errors}")
+            form = AskForm()
+    else:
+        form = AskForm()
+    return render(request, 'ask-question.html', {'form': form})
     MEMBERS = User.objects.all()
     TAGS = Tag.get_all_objects()
     search_query = request.GET.get('search_query')
@@ -47,19 +81,27 @@ def question_detail(request, question_id):
     QUESTIONS = Question.get_all_objects()
     TAGS = Tag.get_all_objects()
     MEMBERS = User.objects.all()
-    question = Question.get_by_id(question_id)
+    question = get_object_or_404(Question, id=question_id)
+    answer = Answer.objects.filter(question=question)
 
     if request.method == 'POST':
-        answer_text = request.POST.get('new_answer')
-        if answer_text:
-            Answer.objects.create(
+        form = AnswerForm(request.POST)
+        if form.is_valid():
+            answer = Answer.objects.create(
                 question=question,
                 author=request.user,
-                text=answer_text,
-                created_at=timezone.now()
+                text=form.cleaned_data['text'],
+                created_at=timezone.now(),
+                rating=0,
+                is_correct=False
             )
+            # return redirect(f'question_detail/{question.id}/#answer-{answer.id}')
             return redirect('question_detail', question_id=question.id)
-
+        else:
+            print('request is not POST')
+            print('error:', form.errors)
+    else:
+        form = AnswerForm()
     # question = next((q for q in QUESTIONS if q == question_id), None)
     if not question:
         return render(request, '404.html', status=404)
@@ -68,6 +110,7 @@ def question_detail(request, question_id):
         'question': question,
         'tags': TAGS,
         'best_members': MEMBERS,
+        'form': form,
     })
 
 
@@ -104,18 +147,24 @@ def login(request):
     USERS = User.objects.all()
     error = None
     if request.method == 'POST':
-        login = request.POST.get('login')
+        username = request.POST.get('login')
         password = request.POST.get('password')
-        user = USERS.get(login)
-        if user and user['password'] == password:
-            global CURRENT_USER
-            CURRENT_USER = login
-            return redirect('settings')
-        error = 'Sorry, wrong password!'
+        continue_url = request.POST.get('next', 'index')
+        user = authenticate(request, username=username, password=password)
+        # user = USERS.get(login)
+        # if user and user['password'] == password:
+        #     global CURRENT_USER
+        #     CURRENT_USER = login
+        #     return redirect('settings')
+        if user is not None:
+            auth_login(request, user)
+            return redirect(continue_url)
+        else:
+            messages.error(request, 'Wrong login or password')
+            
+    return render(request, 'login.html')
 
-    return render(request, 'login.html', {'error': error})
-
-def register(request):
+def signup(request):
     TAGS = Tag.get_all_objects()
     USERS = User.objects.all()
     error = None
@@ -126,28 +175,52 @@ def register(request):
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
         avatar = request.FILES.get('avatar')
-
-        if login in USERS:
-            error = 'Sorry, this login is already registered!'
-        elif any(user['email'] == email for user in USERS.values()):
-            error = 'Sorry, this email address already registered!'
-        elif password != password2:
-            error = 'Passwords do not match!'
+        if User.objects.filter(username=nickname).exists():
+            messages.error(request, 'Sorry, this login is already registered!')
         else:
-            USERS[login] = {
-                'tags': TAGS,
-                'email': email,
-                'nickname': nickname,
-                'password': password,
-                'avatar': avatar
-            }
-            return redirect('login')
+            user = User.objects.create_user(username=nickname, email=email, password=password)
+            auth_login(request, user)
+            return redirect('index')
+        # if login in USERS:
+        #     error = 'Sorry, this login is already registered!'
+        # elif any(user['email'] == email for user in USERS.values()):
+        #     error = 'Sorry, this email address already registered!'
+        # elif password != password2:
+        #     error = 'Passwords do not match!'
+        # else:
+        #     USERS[login] = {
+        #         'tags': TAGS,
+        #         'email': email,
+        #         'nickname': nickname,
+        #         'password': password,
+        #         'avatar': avatar
+        #     }
+        #     return redirect('login')
 
-        return render(request, 'register.html', {
+        return render(request, 'signup.html', {
             'error': error,
             'login': login,
             'email': email,
             'nickname': nickname,
         })
+    return render(request, 'signup.html')
 
-    return render(request, 'register.html')
+
+def logout_views(request):
+    next_url = request.GET.get('next', 'index')
+    logout(request)
+    return redirect(next_url)
+
+
+@login_required
+def edit_profile(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile, user=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('edit_profile')
+    else:
+        form = ProfileForm(instance=profile, user=request.user)
+    return render(request, 'edit_profile.html', {'form': form})

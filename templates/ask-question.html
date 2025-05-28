@@ -4,22 +4,31 @@
 <div class="container mt-4">
   <h2 class="mb-4">New Question</h2>
 
-  <form action="" method="post">
+  <form method="post">
     {% csrf_token %}
     
     <div class="mb-3">
       <label for="title" class="form-label">Title</label>
-      <input type="text" name="title" class="form-control" id="title" placeholder="How install python?" required>
+      {{ form.title }}
+      {% if form.title.errors %}
+        <div class="alert alert-danger mt-2">
+          {% for error in form.title.errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
     </div>
 
     <div class="mb-3">
       <label for="text" class="form-label">Text</label>
-      <textarea name="text" class="form-control" id="text" rows="6" placeholder="Describe your question here..." required>{{ text }}</textarea>
+      <!-- <textarea name="text" class="form-control" id="cpntent" rows="6" placeholder="Describe your question here..." required>{{ form.content }}</textarea> -->
+      {{ form.content }}
     </div>
 
     <div class="mb-3">
       <label for="tags" class="form-label">Tags</label>
-      <input type="text" name="tags" class="form-control" id="tags" placeholder="python, programming" required>
+      <!-- <textarea type="text" name="tags" class="form-control" id="tags" placeholder="python, programming" required>{{ form.content.tags }}</textarea> -->
+      {{ form.tags }}
     </div>
 
     <button type="submit" class="btn btn-primary">Ask</button>

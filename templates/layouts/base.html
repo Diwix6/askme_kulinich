@@ -21,21 +21,29 @@
 
             <div class="d-flex gap-2 align-items-center">
                 <div>
-                    <img  href="{% url 'settings' %}" src="static/img/avatar-default.svg" alt="avatar" width="50" height="50" >
+                    <img  href="{% url 'edit_profile' %}" src="static/img/avatar-default.svg" alt="avatar" width="50" height="50" >
                 </div>
                 <div class="content">
-                    <div class="content__name">Nickname</div>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                      <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="btn btn-outline-info me-2" href="{% url 'settings' %}">Settings</a>
-                          </li>
-                        <li class="nav-item">
-                          <a class="btn btn-outline-primary me-2" href="{% url 'login' %}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="btn btn-primary" href="{% url 'register' %}">Register</a>
-                        </li>
+                    {% if user.is_authenticated %}
+                        <span class="navbar-text me-3">{{ user.username }}</span>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav ms-auto">
+                                <li class="nav-item">
+                                    <a class="btn btn-outline-info me-2" href="{% url 'edit_profile' %}">Settings</a>
+                                    <a class="btn btn-outline-danger" href="{% url 'logout' %}?next={{ request.path }}">Exit</a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav ms-auto">
+                                <li class="nav-item">
+                                    <a class="btn btn-outline-primary me-2" href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                                    <a class="btn btn-primary" href="{% url 'signup' %}">Signup</a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endif %}
                       </ul>
                     </div>
                 </div>
