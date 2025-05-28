@@ -4,24 +4,29 @@
     <h2>Edit Profile</h2>
     {% if messages %}
       {% for message in messages %}
-        <div class="alert alert-danger" role="alert">{{ message }}</div>
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">{{ message }}</div>
       {% endfor %}
     {% endif %}
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="mb-3">
         <label class="form-label">Login</label>
-        <input type="text" class="form-control" name="login" value="{{ user.username }}" required>
+        <input type="text" class="form-control" name="username" value="{{ form.username.value }}" required>
       </div>
       <div class="mb-3">
         <!-- {{ form.email.label_tag }} {{ form.email }} <br><br> -->
         <label class="form-label">{{ form.email.label_tag }}</label>
-        <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
+        <input type="email" class="form-control" name="email" value="{{ form.email.value }}" required>
       </div>
       <div class="mb-3">
         <label class="form-label">Avatar</label>
-        <input type="email" class="form-control" name="email" value="{{ user.avatar }}" required>
+            <!-- <input type="file" class="form-control" name="avatar"> -->
+            <div class="mb-3">
+                <label class="form-label">{{ form.avatar.label }}</label>
+                {{ form.avatar }}
+            </div>
       </div>
       <button type="submit" class="btn btn-primary">Save</button>
+      
         </form>
 {% endblock %}

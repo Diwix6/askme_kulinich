@@ -1,15 +1,17 @@
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.contrib.auth import authenticate, login as auth_login, logout
-from .models import Question, Tag, Answer, Profile
-from django.shortcuts import redirect, render
+from .models import Question, Tag, Answer, Profile, QuestionLike
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm, AskForm, AnswerForm
-from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
+from .models import Reaction
 
 def index(request):
     QUESTIONS = Question.get_all_objects()
@@ -45,13 +47,15 @@ def ask_question(request):
             # # question.text = form.cleaned_data['content']
             # question.save()
             # form.save_m2m()
+            author=request.user.profile
             q = Question.objects.create(
                 title=form.cleaned_data['title'],
                 text=form.cleaned_data['content'],
-                author=request.user,
+                author=author,
             )
             raw_tags = form.cleaned_data['tags']
             name_tags = raw_tags[0].split('/')
+            author.add_question()
             print(raw_tags, name_tags)
             for name in name_tags:
                 tag, created = Tag.objects.get_or_create(name=name.lower())
@@ -65,17 +69,7 @@ def ask_question(request):
     else:
         form = AskForm()
     return render(request, 'ask-question.html', {'form': form})
-    MEMBERS = User.objects.all()
-    TAGS = Tag.get_all_objects()
-    search_query = request.GET.get('search_query')
-    if search_query:
-        print(f"User searched for: {search_query}")
-    return render(request, 'ask-question.html', {
-        'tags': TAGS,
-        'best_members': MEMBERS,
-        'text': search_query,
-    })
-
+    
 
 def question_detail(request, question_id):
     QUESTIONS = Question.get_all_objects()
@@ -84,6 +78,11 @@ def question_detail(request, question_id):
     question = get_object_or_404(Question, id=question_id)
     answer = Answer.objects.filter(question=question)
 
+    # if request.user.is_authenticated:
+    #     user_has_voted = Vote.objects.filter(question=question, user=request.user).exists()
+    # else:
+    #     user_has_voted = False
+    
     if request.method == 'POST':
         form = AnswerForm(request.POST)
         if form.is_valid():
@@ -97,9 +96,9 @@ def question_detail(request, question_id):
             )
             # return redirect(f'question_detail/{question.id}/#answer-{answer.id}')
             return redirect('question_detail', question_id=question.id)
-        else:
-            print('request is not POST')
-            print('error:', form.errors)
+        # else:
+        #     print('request is not POST')
+        #     print('error:', form.errors)
     else:
         form = AnswerForm()
     # question = next((q for q in QUESTIONS if q == question_id), None)
@@ -178,24 +177,9 @@ def signup(request):
         if User.objects.filter(username=nickname).exists():
             messages.error(request, 'Sorry, this login is already registered!')
         else:
-            user = User.objects.create_user(username=nickname, email=email, password=password)
+            # user = User.objects.create_user(username=nickname, email=email, password=password)
             auth_login(request, user)
             return redirect('index')
-        # if login in USERS:
-        #     error = 'Sorry, this login is already registered!'
-        # elif any(user['email'] == email for user in USERS.values()):
-        #     error = 'Sorry, this email address already registered!'
-        # elif password != password2:
-        #     error = 'Passwords do not match!'
-        # else:
-        #     USERS[login] = {
-        #         'tags': TAGS,
-        #         'email': email,
-        #         'nickname': nickname,
-        #         'password': password,
-        #         'avatar': avatar
-        #     }
-        #     return redirect('login')
 
         return render(request, 'signup.html', {
             'error': error,
@@ -214,13 +198,57 @@ def logout_views(request):
 
 @login_required
 def edit_profile(request):
-    profile, created = Profile.objects.get_or_create(user=request.user)
+    profile = request.user.profile
+    # profile, created = Profile.objects.get_or_create(user=request.user)
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=profile, user=user)
+        form = ProfileForm(request.POST, request.FILES, instance=profile, user=request.user)
+        
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('edit_profile')
+        else:
+            print(form.errors)
     else:
+        # form = ProfileForm(instance=profile, user=request.user)
         form = ProfileForm(instance=profile, user=request.user)
     return render(request, 'edit_profile.html', {'form': form})
+
+
+@csrf_protect
+def answer_vote_handler(request):
+    print('answer_vote_handler')
+    if (request.user.is_anonymous):
+        return JsonResponse({'error': 1, 'message': 'You have to login for voting!'})
+    
+    answer_id = request.POST.get('answer_id')
+    positive = request.POST.get('positive')
+    answer = get_object_or_404(Answer, id=answer_id)
+    if (answer.author != request.user.profile):
+        rating = Reaction.objects.add_reaction(author=request.user.profile, object=answer, positive=positive)
+    else:
+        return JsonResponse({'error': 1, 'message': 'You can\'t rate self-created objects!'})
+    return JsonResponse({'error': 0, 'rating': rating})
+
+
+@csrf_protect
+def question_vote_handler(request):
+    print('question_vote_handler')
+    if (request.user.is_anonymous):
+        return JsonResponse({'error': 1, 'message': 'You have to login for voting!'})
+    
+    question_id = request.POST.get('question_id')
+    positive = request.POST.get('positive')
+    question = get_object_or_404(Question, id=question_id)
+    # if not hasattr(request.user, 'profile'):
+        # print('User has no profile')
+        # return JsonResponse({'message': 'User has no profile'}, status=400)
+    if (question.author != request.user.profile):
+        print(request.user, question.author)
+        print('question.author != request.user')
+        rating = Reaction.objects.add_reaction(author=request.user, object=question, positive=positive)
+    else:
+        print('question.author == request.user')
+        return JsonResponse({'error': 1, 'message': 'You can\'t rate self-created objects!'})
+    print('rating:', rating)
+    return JsonResponse({'error': 0, 'rating': rating})

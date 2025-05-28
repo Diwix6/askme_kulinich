@@ -10,23 +10,24 @@ class ProfileForm(forms.ModelForm):
     
     class Meta:
         model = Profile
-        fields = ['avatar']
+        fields = ['avatar', 'email', 'username']
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user')
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        self.fields['email'].initial = user.email
-        self.fields['username'].initial = user.username
+        if self.user:
+            self.fields['email'].initial = self.user.email
+            self.fields['username'].initial = self.user.username
 
     def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
-        user.username = self.cleaned_data['username']
-        if commit:
-            user.save()
-            profile = user.profile
-            profile.avatar = self.cleaned_data.get('avatar')
-            profile.save()
+        profile = super().save(commit=False)
+        if self.user:
+            self.user.email = self.cleaned_data['email']
+            self.user.username = self.cleaned_data['username']
+            if commit:
+                self.user.save()
+                profile.user = self.user
+                profile.save()
         return profile
 
 # class LoginForm(forms.Form):

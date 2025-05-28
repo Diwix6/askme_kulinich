@@ -1,19 +1,20 @@
+{% load static %}
+
 {% for question in questions %}
 
 <style>
-  .vote {
-  display: inline-block;
-  overflow: hidden;
-  width: 40px;
-  height: 25px;
-  cursor: pointer;
-  background: url('https://i.sstatic.net/iqN2k.png');
-  background-position: 0 -25px;
-} 
-
+.vote {
+      display: inline-block;
+      overflow: hidden;
+      width: 40px;
+      height: 25px;
+      cursor: pointer;
+      background: url('https://i.sstatic.net/iqN2k.png');
+      background-position: 0 -25px;
+  } 
 
 .vote.on {
-  background-position: 0 2px;
+    background-position: 0 2px;
 }
 </style>
 
@@ -30,15 +31,12 @@
           </div>
           <!-- <input type="number" class="form-control" value="{{ question.votes }}"> -->
           <!-- <span class="sprite vote"> </span> -->
-          <div class="input-group mb-3">
-            <button class="btn btn-success btn-sm" type="button" id="upvoteButton">
-                <i class="bi bi-arrow-up"></i> 
-            </button>
-            <span class="form-control form-control-sm" id="voteCount">{{ question.rating }}</span>
-            <button class="btn btn-danger btn-sm" type="button" id="downvoteButton">
-                <i class="bi bi-arrow-down"></i>
-            </button>
-        </div>
+          <div class="question-like-section d-flex justify-content-center align-items-center">
+              {% csrf_token %}
+                <input type="button" value="ⴷ" class="btn btn-success btn-sm" name="like" data-id="{{ question.id }}">
+              <span class="form-control form-control-sm" id="voteCount">{{ question.rating }}</span>
+                <input type="button" value="V" class="btn btn-danger btn-sm" name="dislike" data-id="{{ question.id }}">
+            </div>
         
         <!-- Подключение Bootstrap Icons (если необходимо) -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
@@ -71,4 +69,8 @@
       </div>
     </div>
   </div>
+
+
+
   {% endfor %}
+<script src="{% static 'js/question_actions.js' %}"></script>

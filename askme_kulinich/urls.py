@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 from app import views
 
@@ -31,4 +33,10 @@ urlpatterns = [
     path('signup/', views.signup, name="signup"),
     path('hot-questions/', views.hot_questions, name='hot_questions'),
     path('logout/', views.logout_views, name='logout'),
+    path('question/vote', views.question_vote_handler, name = "question_vote"),
+    # path('mark-correct/', views.mark_correct_answer, name='mark_correct_answer'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

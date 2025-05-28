@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bootstrap demo</title>
-    <link href="{% static "css/bootstrap.css" %}" rel="stylesheet" />
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet" />
 </head>
 
 <body>
@@ -20,21 +20,28 @@
             </form>
 
             <div class="d-flex gap-2 align-items-center">
-                <div>
-                    <img  href="{% url 'edit_profile' %}" src="static/img/avatar-default.svg" alt="avatar" width="50" height="50" >
-                </div>
-                <div class="content">
+
+                
                     {% if user.is_authenticated %}
-                        <span class="navbar-text me-3">{{ user.username }}</span>
-                        <div class="collapse navbar-collapse" id="navbarNav">
-                            <ul class="navbar-nav ms-auto">
-                                <li class="nav-item">
-                                    <a class="btn btn-outline-info me-2" href="{% url 'edit_profile' %}">Settings</a>
-                                    <a class="btn btn-outline-danger" href="{% url 'logout' %}?next={{ request.path }}">Exit</a>
-                                </li>
-                            </ul>
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="avatar" width="50" height="50" class="rounded-circle">
+                        {% else %}
+                            <img href="{% url 'edit_profile' %}" src="static/img/avatar-default.svg" alt="avatar" width="50" height="50" class="rounded-circle">
+                        {% endif %}
+                        <div class="content">
+                            <span class="navbar-text me-3">{{ user.username }}</span>
+                            <div class="collapse navbar-collapse" id="navbarNav">
+                                <ul class="navbar-nav ms-auto">
+                                    <li class="nav-item">
+                                        <a class="btn btn-outline-info me-2" href="{% url 'edit_profile' %}">Settings</a>
+                                        <a class="btn btn-outline-danger" href="{% url 'logout' %}?next={{ request.path }}">Exit</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     {% else %}
+                    <img href="{% url 'edit_profile' %}" src="static/img/avatar-default.svg" alt="avatar" width="50" height="50" class="rounded-circle">
+                    <div class="content">
                         <div class="collapse navbar-collapse" id="navbarNav">
                             <ul class="navbar-nav ms-auto">
                                 <li class="nav-item">
@@ -43,6 +50,7 @@
                                 </li>
                             </ul>
                         </div>
+                    </div>
                     {% endif %}
                       </ul>
                     </div>
