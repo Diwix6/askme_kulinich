@@ -34,4 +34,25 @@
     <button type="submit" class="btn btn-primary">Ask</button>
   </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/centrifuge@2.8.0/dist/centrifuge.min.js"></script>
+<script>
+const centrifuge = new Centrifuge("ws://localhost:8000/connection/websocket", {
+    token: "{{ token }}",  // опционально, если используешь auth
+});
+
+centrifuge.on('connect', function(ctx) {
+    console.log('connected to Centrifugo');
+});
+
+centrifuge.subscribe("question_{{ question.id }}", function(ctx) {
+    const newAnswer = ctx.data;
+    // логика добавления ответа на страницу
+    alert('Новый ответ: ' + newAnswer.text);
+});
+
+centrifuge.connect();
+</script>
+
+
 {% endblock %}

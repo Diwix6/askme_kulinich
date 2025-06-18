@@ -13,6 +13,30 @@ from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 from .models import Reaction
 
+import requests
+import json
+
+CENTRIFUGO_API_URL = "http://localhost:8000/api"
+CENTRIFUGO_API_KEY = "секретный_ключ_от_genkey"  # замените на свой
+
+def send_to_centrifugo(channel, data):
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"apikey {CENTRIFUGO_API_KEY}"
+    }
+
+    payload = {
+        "method": "publish",
+        "params": {
+            "channel": channel,
+            "data": data
+        }
+    }
+
+    response = requests.post(CENTRIFUGO_API_URL, headers=headers, data=json.dumps(payload))
+    return response.status_code, response.text
+
+
 def index(request):
     QUESTIONS = Question.get_all_objects()
     for i in QUESTIONS:
@@ -60,6 +84,11 @@ def ask_question(request):
             for name in name_tags:
                 tag, created = Tag.objects.get_or_create(name=name.lower())
                 q.tags.add(tag)
+            # Send data to Centrifugo
+            send_to_centrifugo(
+                channel=f"question_{q}",
+                data=q
+            )
             return redirect('question_detail', question_id=q.id)
         else:
             print('form is not valid')

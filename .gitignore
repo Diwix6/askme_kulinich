@@ -7,5 +7,6 @@ staticfiles/
 # Ignore Python bytecode files
 *.pyc
 *.log
-# Ignore environment variable files
-.env
+*.env
+*.md
+centrifugo/LICENSE
